@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Counter Polling Demo</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; }
+        #counter { font-size: 2rem; margin: 1rem 0; }
+        button { font-size: 1rem; padding: 0.5rem 1rem; margin-right: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>Counter Long-Polling Demo</h1>
+    <div id="counter">Loading...</div>
+    <button id="incrementBtn">Increment</button>
+
+    <script>
+        const counterEl = document.getElementById("counter");
+        const incrementBtn = document.getElementById("incrementBtn");
+
+        // Function to do polling
+        async function poll() {
+            try {
+                const res = await fetch("http://127.0.0.1:3000/get");
+                const data = await res.json();
+                counterEl.textContent = data.count;
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
+        }
+
+        setInterval(poll, 1000);
+
+
+        // Increment button
+        incrementBtn.addEventListener("click", async () => {
+            try {
+                await fetch("http://127.0.0.1:3000/increment");
+                // no need to update UI here; wait_for_change will trigger
+            } catch (err) {
+                console.error("Increment error:", err);
+            }
+        });
+    </script>
+</body>
+</html>
