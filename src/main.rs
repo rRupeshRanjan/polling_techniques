@@ -2,7 +2,8 @@ mod counter;
 mod handlers;
 
 use counter::Counter;
-use handlers::counter::{get_count, increment};
+use handlers::counter::{get_count, increment, wait_for_change};
+use handlers::index::index_html;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
@@ -10,8 +11,6 @@ use tower_http::cors::{Any, CorsLayer};
 use axum::routing::get;
 use axum::{extract::Extension, Router};
 use tokio::net::TcpListener;
-
-use crate::handlers::counter::wait_for_change;
 
 #[tokio::main]
 async fn main() {
@@ -23,6 +22,7 @@ async fn main() {
         .allow_headers(Any);
 
     let app = Router::new()
+        .route("/", get(index_html))
         .route("/get", get(get_count))
         .route("/increment", get(increment))
         .route("/wait", get(wait_for_change))
