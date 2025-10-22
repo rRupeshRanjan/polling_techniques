@@ -11,6 +11,8 @@ use axum::routing::get;
 use axum::{extract::Extension, Router};
 use tokio::net::TcpListener;
 
+use crate::handlers::counter::wait_for_change;
+
 #[tokio::main]
 async fn main() {
     let counter = Arc::new(Counter::new());
@@ -23,6 +25,7 @@ async fn main() {
     let app = Router::new()
         .route("/get", get(get_count))
         .route("/increment", get(increment))
+        .route("/wait", get(wait_for_change))
         .layer(Extension(counter.clone()))
         .layer(cors_layer);
 

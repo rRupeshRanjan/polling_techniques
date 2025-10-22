@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Counter Polling Demo</title>
+    <title>Counter Long-Polling Demo</title>
     <style>
         body { font-family: sans-serif; padding: 2rem; }
         #counter { font-size: 2rem; margin: 1rem 0; }
@@ -18,19 +18,29 @@
         const counterEl = document.getElementById("counter");
         const incrementBtn = document.getElementById("incrementBtn");
 
-        // Function to do polling
-        async function poll() {
+        // Function to do long-polling
+        async function pollLong() {
             try {
-                const res = await fetch("http://127.0.0.1:3000/get");
+                const res = await fetch("http://127.0.0.1:3000/wait");
                 const data = await res.json();
                 counterEl.textContent = data.count;
             } catch (err) {
                 console.error("Polling error:", err);
+            } finally {
+                pollLong(); // immediately start next long-poll request
             }
         }
 
-        setInterval(poll, 1000);
+        async function init() {
+            const res = await fetch("http://127.0.0.1:3000/get");
+            const data = await res.json();
+            counterEl.textContent = data.count;
 
+            // start long-polling after initial load
+            pollLong();
+        }
+
+        init();
 
         // Increment button
         incrementBtn.addEventListener("click", async () => {

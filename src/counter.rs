@@ -31,4 +31,8 @@ impl Counter {
     pub fn get(&self) -> u64 {
         self.value.load(Ordering::SeqCst)
     }
+
+    pub fn subscribe(&self) -> watch::Receiver<u64> {
+        self.tx.subscribe()
+    }
 }
