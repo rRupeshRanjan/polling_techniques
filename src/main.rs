@@ -11,6 +11,8 @@ use axum::routing::get;
 use axum::{extract::Extension, Router};
 use tokio::net::TcpListener;
 
+use handlers::index::index_html;
+
 #[tokio::main]
 async fn main() {
     let counter = Arc::new(Counter::new());
@@ -21,6 +23,7 @@ async fn main() {
         .allow_headers(Any);
 
     let app = Router::new()
+        .route("/", get(index_html))
         .route("/get", get(get_count))
         .route("/increment", get(increment))
         .layer(Extension(counter.clone()))
