@@ -11,12 +11,10 @@
 </head>
 <body>
     <h1>Counter Long-Polling Demo</h1>
-    <div id="counter">Loading...</div>
-    <button id="incrementBtn">Increment</button>
+    <div id="counter">Loading...</div>\
 
     <script>
         const counterEl = document.getElementById("counter");
-        const incrementBtn = document.getElementById("incrementBtn");
 
         // Function to do long-polling
         async function pollLong() {
@@ -41,16 +39,6 @@
         }
 
         init();
-
-        // Increment button
-        incrementBtn.addEventListener("click", async () => {
-            try {
-                await fetch("http://127.0.0.1:3000/increment");
-                // no need to update UI here; wait_for_change will trigger
-            } catch (err) {
-                console.error("Increment error:", err);
-            }
-        });
     </script>
 </body>
 </html>
