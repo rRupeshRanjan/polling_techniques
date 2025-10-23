@@ -2,7 +2,7 @@ mod counter;
 mod handlers;
 
 use counter::Counter;
-use handlers::counter::{get_count, increment, ws_handler};
+use handlers::counter::{counter_events, get_count, increment};
 use handlers::index::index_html;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -25,7 +25,7 @@ async fn main() {
         .route("/", get(index_html))
         .route("/get", get(get_count))
         .route("/increment", get(increment))
-        .route("/ws", get(ws_handler))
+        .route("/events", get(counter_events))
         .layer(Extension(counter.clone()))
         .layer(cors_layer);
 
