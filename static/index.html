@@ -1,56 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Counter Long-Polling Demo</title>
-    <style>
-        body { font-family: sans-serif; padding: 2rem; }
-        #counter { font-size: 2rem; margin: 1rem 0; }
-        button { font-size: 1rem; padding: 0.5rem 1rem; margin-right: 1rem; }
-    </style>
+  <meta charset="utf-8" />
+  <title>WS Counter (full websocket)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 2rem; }
+    #counter { font-size: 3rem; margin: 1rem 0; }
+    button { font-size: 1rem; padding: .5rem 1rem; }
+    #status { color: gray; margin-top: .5rem; }
+  </style>
 </head>
 <body>
-    <h1>Counter Long-Polling Demo</h1>
-    <div id="counter">Loading...</div>
-    <button id="incrementBtn">Increment</button>
+  <h1>WebSocket Counter (full WS)</h1>
+  <div id="counter">—</div>
+  <button id="inc">Increment</button>
+  <div id="status">connecting…</div>
 
-    <script>
-        const counterEl = document.getElementById("counter");
-        const incrementBtn = document.getElementById("incrementBtn");
+  <script>
+    const counterEl = document.getElementById('counter');
+    const statusEl = document.getElementById('status');
+    const incBtn = document.getElementById('inc');
 
-        // Function to do long-polling
-        async function pollLong() {
-            try {
-                const res = await fetch("http://127.0.0.1:3000/wait");
-                const data = await res.json();
-                counterEl.textContent = data.count;
-            } catch (err) {
-                console.error("Polling error:", err);
-            } finally {
-                pollLong(); // immediately start next long-poll request
-            }
-        }
+    let socket;
+    function connect() {
+      statusEl.textContent = 'connecting...';
+      socket = new WebSocket(`ws://${location.hostname}:3000/ws`);
 
-        async function init() {
-            const res = await fetch("http://127.0.0.1:3000/get");
-            const data = await res.json();
+      socket.addEventListener('open', () => {
+        statusEl.textContent = 'connected';
+      });
+
+      socket.addEventListener('message', (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (typeof data.count !== 'undefined') {
             counterEl.textContent = data.count;
-
-            // start long-polling after initial load
-            pollLong();
+          }
+        } catch (err) {
+          console.error('invalid message', ev.data, err);
         }
+      });
 
-        init();
+      socket.addEventListener('close', () => {
+        statusEl.textContent = 'disconnected — reconnecting in 1s';
+        setTimeout(connect, 1000);
+      });
 
-        // Increment button
-        incrementBtn.addEventListener("click", async () => {
-            try {
-                await fetch("http://127.0.0.1:3000/increment");
-                // no need to update UI here; wait_for_change will trigger
-            } catch (err) {
-                console.error("Increment error:", err);
-            }
-        });
-    </script>
+      socket.addEventListener('error', (e) => {
+        console.error('ws error', e);
+      });
+    }
+
+    connect();
+
+    incBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ action: "increment" }));
+      } else {
+        console.warn('socket not open');
+      }
+    });
+  </script>
 </body>
 </html>
